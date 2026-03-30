@@ -6,7 +6,7 @@ env/
 # ML Datasets and Heavy Training Models (Stops the upload from crashing!)
 PlantVillage/
 plant_disease_model/
-plant_disease_model_v2/
+
 
 # Ignore the old/fake backend folder entirely
 PlantDiseasebackend/
