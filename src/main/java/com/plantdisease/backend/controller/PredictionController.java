@@ -1,17 +1,24 @@
 package com.plantdisease.backend.controller;
 
-import com.plantdisease.backend.dto.PythonResponse;
-import com.plantdisease.backend.model.Disease;
-import com.plantdisease.backend.repository.DiseaseRepository;
-import org.springframework.http.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.plantdisease.backend.dto.PythonResponse;
+import com.plantdisease.backend.model.Disease;
+import com.plantdisease.backend.repository.DiseaseRepository;
 
 @RestController
 @RequestMapping("/api")
@@ -58,13 +65,23 @@ public class PredictionController {
                 return ResponseEntity.status(500).body("AI Service returned no data");
             }
 
-            // 4. Fetch Treatment from Database using the Name from Python
+            
+            double confidenceThreshold = 0.70;
+            Map<String, Object> finalResponse = new HashMap<>(); // Initialized ONCE here
+            finalResponse.put("confidence", result.getConfidence());
+
+            if (result.getConfidence() < confidenceThreshold) {
+                finalResponse.put("disease_name", "Low Confidence / Unknown");
+                finalResponse.put("description", "The AI is not sure what this is. It might be blurry or not a plant leaf.");
+                finalResponse.put("treatment", "Please take a clearer photo in better lighting, focusing on the leaf.");
+                return ResponseEntity.ok(finalResponse);
+            }
+
+            // 4. Fetch Treatment (Only if confidence is high)
             Disease diseaseInfo = diseaseRepository.findByName(result.getClassName());
 
-            // 5. Construct Final Response
-            Map<String, Object> finalResponse = new HashMap<>();
+            // 5. Construct Final Response (Reuse the finalResponse map)
             finalResponse.put("disease_name", result.getClassName());
-            finalResponse.put("confidence", result.getConfidence());
 
             if (diseaseInfo != null) {
                 finalResponse.put("description", diseaseInfo.getDescription());
