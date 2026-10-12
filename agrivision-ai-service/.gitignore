@@ -1,0 +1,15 @@
+# Python environment and cache
+__pycache__/
+venv/
+env/
+
+# ML Datasets and Heavy Training Models (Stops the upload from crashing!)
+PlantVillage/
+plant_disease_model/
+
+
+# Ignore the old/fake backend folder entirely
+PlantDiseasebackend/
+
+# Spring Boot build files for the REAL backend
+backend/target/
